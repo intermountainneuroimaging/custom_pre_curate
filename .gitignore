@@ -1,5 +1,8 @@
 # Ignore Mac system files
 .DS_store
 
+# Ignore the .idea folder
+.idea
+
 #Ignore all debugging job pull directories
 *custom-pre-curate-*
