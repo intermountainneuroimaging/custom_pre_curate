@@ -1,0 +1,10 @@
+{
+    "destination": {
+        "id": "6271efccb7f8475bd2a24407",
+        "type": "analysis"
+    },
+    "inputs": {},
+    "config": {
+        "debug": true
+    }
+}

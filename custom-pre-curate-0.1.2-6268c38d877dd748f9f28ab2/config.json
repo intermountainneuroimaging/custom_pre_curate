@@ -1,0 +1,15 @@
+{
+    "config": {
+        "debug": true
+    },
+    "inputs": {
+        "api-key": {
+            "base": "api-key",
+            "key": "flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y"
+        }
+    },
+    "destination": {
+        "id": "6268c38d877dd748f9f28ab1",
+        "type": "analysis"
+    }
+}
