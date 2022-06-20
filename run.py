@@ -39,8 +39,15 @@ class Curator(HierarchyCurator):
             df = pd.read_csv(csv, sep=",")
             # convert to dictionary for easy get calls
             list_of_mappings = dict(df.values)
+            #Get the current acquisition label
+            acq_label = acquisition.label
+            #If needed, strip the beginning sequence numbering
+            split_label = acq_label.split(' - ')
+            #The last entry in the list will always be the character set (what we want)
+            acq_label = split_label[len(split_label) - 1]
+
             # now map to new label
-            new_label = list_of_mappings.get(acquisition.label)
+            new_label = list_of_mappings.get(acq_label)
             if new_label:
                 # update acquisition label
                 acquisition.update({"label": new_label})
@@ -60,7 +67,7 @@ if __name__ == "__main__":
     #                         , manifest_path='custom-pre-curate-0.1.3-62695de675975922d1f28bd4/manifest.json') as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        config_dictionary['api-key']['key'] = 'XXXX'
+        config_dictionary['api-key']['key'] = 'flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y'
 
         parent, input_files = parser.parse_config(gtk_context)
 
