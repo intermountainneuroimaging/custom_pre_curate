@@ -24,7 +24,7 @@
         },
         "gear-builder": {
             "category": "analysis",
-            "image": "lsherbakov/custom-pre-curate:0.1.6"
+            "image": "lsherbakov/custom-pre-curate:0.1.7"
         }
     },
     "author": "Lena Sherbakov",
@@ -48,5 +48,5 @@
     "label": "Custom Pre Curate",
     "url": "https://github.com/intermountainneuroimaging",
     "source": "https://github.com/intermountainneuroimaging",
-    "version": "0.1.6"
+    "version": "0.1.7"
 }

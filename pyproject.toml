@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "fw-gear-custom-curator"
-version = "0.1.6"
+version = "0.1.7"
 description = "Custom hierarchy curation gear by INC"
 authors = ["Lena Sherbakov <lesh2786@colorado.edu>"]
 license = "MIT"

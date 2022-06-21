@@ -67,7 +67,7 @@ if __name__ == "__main__":
     #                         , manifest_path='custom-pre-curate-0.1.3-62695de675975922d1f28bd4/manifest.json') as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        config_dictionary['api-key']['key'] = 'flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y'
+        config_dictionary['api-key']['key'] = 'XXX'
 
         parent, input_files = parser.parse_config(gtk_context)
 
