@@ -131,7 +131,7 @@ if __name__ == "__main__":
     #                         , manifest_path='bids-pre-curate-0.1.5_inc1.1-62ed7835de9a4cd49f4f4e67/manifest.json') as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        config_dictionary['api-key']['key'] = 'flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y'
+        config_dictionary['api-key']['key'] = 'XXX'
 
         parent, input_files = parser.parse_config(gtk_context)
 
