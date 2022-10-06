@@ -26,36 +26,100 @@ class Curator(HierarchyCurator):
 
     def curate_acquisition(self, acquisition: flywheel.Acquisition):
         parents = acquisition.parents
-        # client = flywheel.Client('flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y')
-        # current_project = client.get(parents.project)
-
         current_project = gtk_context.client.get(parents.project)
         contents_of_csv = current_project.read_file('acquisition_label_remapping.csv')
         # decode the UTF-8 file string
         decode = contents_of_csv.decode('utf-8')
         csv = StringIO(decode)
+        # set return code
+        return_code = 0
 
         if csv:
             df = pd.read_csv(csv, sep=",")
             # convert to dictionary for easy get calls
             list_of_mappings = dict(df.values)
-            #Get the current acquisition label
+            #1. CHECK IF CURRENT LABEL IS ALREADY REPROIN COMPLIANT
             acq_label = acquisition.label
-            #If needed, strip the beginning sequence numbering
-            split_label = acq_label.split(' - ')
-            #The last entry in the list will always be the character set (what we want)
-            acq_label = split_label[len(split_label) - 1]
-
-            # now map to new label
-            new_label = list_of_mappings.get(acq_label)
-            if new_label:
-                # update acquisition label
-                acquisition.update({"label": new_label})
-                log.info("Curating acquisition label: %s ---> %s", acquisition.label, new_label)
-            else:
+            val_list = list(list_of_mappings.values())
+            try:
+                reverse_exists = val_list.index(acq_label)
+                log.info("Acquisition looks to be already pre-curated")
                 log.info("No change in acquisition label: " + acquisition.label)
+                return return_code
+            except:
+                #2. Get the current acquisition label: IF FROM PL, MUST BE DICOM NAME, IF FROM SCANNER MUST BE ACQ LABEL
+                for ff in acquisition.files:
+                    if ff.type == 'dicom':
+                        dcm_file_name = (ff.name).split('.')[0]
+                temp_label = dcm_file_name
+
+                #If needed, strip the beginning sequence numbering. Doesn't do anything if coming from scanner
+                split_label = temp_label.split(' - ')
+
+                # If this is acquisition is coming from PETA LIBRARY, make it looks as if it's coming from the scanner
+                if len(split_label) > 1:
+                    # this is coming from PL
+                    acq_label = split_label[len(split_label) - 1]
+                    #start an array with all other acq file names that came before
+                    file_names = []
+                    new_label = acq_label
+                    session_of_interest = gtk_context.client.get(acquisition.session)
+                    #loop through all dicom names and add to list
+                    acquisitions = session_of_interest.acquisitions.find(sort='timestamp:asc')
+                    #loop through all acquisitions except for current one, which should be at the very end of the list
+                    for acq in acquisitions[:-1]:
+                        for ff in acq.files:
+                            if ff.type == 'dicom':
+                                num_name = ((ff.name).split('.')[0]).split(' - ')[1]
+                                file_names.append(num_name)
+    
+                    #sum the number of times this file name already exists. This gives you the relabelling index
+                    already_exists = sum(1 for i in file_names if i == new_label)
+                    #set the new label based on the already exists count
+                    if already_exists > 0:
+                        new_label = acq_label + "_" + str(already_exists)
+                    #Now set the new_label to acq_label
+                    acq_label = new_label
+
+                # 3. MAP to new ReproIn label. This is the only part that should run when ingesting from scanner
+                new_label = list_of_mappings.get(acq_label)
+                #see if the mapping exists
+                if new_label:
+                    # Does acquisition name already exist?
+                    session_of_interest = gtk_context.client.get(acquisition.session)
+                    already_exists = session_of_interest.acquisitions.find(f'label={new_label}')
+                    #set the repetition count of the file
+                    rep = 0
+                    #if the acquistion name already exists, append an _1, if still exists then an _2, etc, until name is unique
+                    while len(already_exists) > 0:
+                        #if you landed in this while loop, then there's an unexpected acquisition to address. While the code below will rename the acquisition to the correct convention, we need to check this manually, so we return an error code
+                        return_code = 1
+                        rep += 1
+                        old_label = list_of_mappings.get(acq_label)
+                        new_label = old_label + "_" + str(rep)
+                        already_exists = session_of_interest.acquisitions.find(f'label={new_label}')
+                    # update acquisition label
+                    acquisition.update({"label": new_label})
+                    log.info("Curating acquisition label: %s ---> %s", acquisition.label, new_label)
+                    if rep > 0:
+                        log.error("The following scan is a duplicate: %s", old_label)
+                        log.error("Correct scan manually before running bids-curate")
+                        sys.exit(1)
+                else:
+                    #see if the reverse mapping exists. This would mean session has already been curated
+                    val_list = list(list_of_mappings.values())
+                    try:
+                        val_list.index(new_label)
+                        log.info("Acquisition looks to be already pre-curated")
+                        log.info("No change in acquisition label: " + acquisition.label)
+                    except:
+                        log.error("The following acquisition has no corresponding reproIn mapping: %s", acquisition.label)
+                        log.error("Check for duplicates or incorrect naming. Correct scan manually before running bids-curate")
+                        sys.exit(1)
         else:
             raise ValueError("no csv file found")
+        log.info("Gear is done.  Returning %s", return_code)
+        return return_code
 
 
 if __name__ == "__main__":
@@ -63,11 +127,11 @@ if __name__ == "__main__":
 
     # Get access to gear config, inputs, and sdk client if enabled.
     with GearToolkitContext() as gtk_context:
-    # with GearToolkitContext(config_path='custom-pre-curate-0.1.3-62695de675975922d1f28bd4/config.json'\
-    #                         , manifest_path='custom-pre-curate-0.1.3-62695de675975922d1f28bd4/manifest.json') as gtk_context:
+    # with GearToolkitContext(config_path='bids-pre-curate-0.1.5_inc1.1-62ed7835de9a4cd49f4f4e67/config.json'\
+    #                         , manifest_path='bids-pre-curate-0.1.5_inc1.1-62ed7835de9a4cd49f4f4e67/manifest.json') as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        config_dictionary['api-key']['key'] = 'XXX'
+        config_dictionary['api-key']['key'] = 'flywheel.rc.colorado.edu:brWEShFriXpt1yZs7y'
 
         parent, input_files = parser.parse_config(gtk_context)
 
@@ -83,6 +147,7 @@ if __name__ == "__main__":
         )
 
         for container in root_walker.walk():
-            my_curator.curate_container(container)
+            return_code = my_curator.curate_container(container)
+        sys.exit(return_code)
 
 

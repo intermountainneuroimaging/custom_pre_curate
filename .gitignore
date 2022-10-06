@@ -6,3 +6,6 @@
 
 #Ignore all debugging job pull directories
 *custom-pre-curate-*
+*bids-pre-curate-*
+#Ignore config which has API key
+config.json
