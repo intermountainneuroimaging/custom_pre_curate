@@ -1,5 +1,5 @@
 {
-    "name": "bids-pre-curate",
+    "name": "utility-bids-pre-curate",
     "inputs": {
         "additional-input-one": {
             "base": "file",
@@ -23,8 +23,8 @@
             "suite": "BIDS"
         },
         "gear-builder": {
-            "category": "analysis",
-            "image": "lsherbakov/bids-pre-curate:0.1.5_inc1.8"
+            "category": "converter",
+            "image": "amhe4269/utility-bids-pre-curate:0.1.5_inc1.8RC1"
         }
     },
     "author": "Lena Sherbakov",
@@ -48,5 +48,5 @@
     "label": "BIDS Pre-Curation",
     "url": "https://github.com/intermountainneuroimaging",
     "source": "https://github.com/intermountainneuroimaging",
-    "version": "0.1.5_inc1.8"
+    "version": "0.1.5_inc1.8RC1"
 }

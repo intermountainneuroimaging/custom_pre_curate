@@ -13,14 +13,24 @@ def parse_config(gear_context):
             - dictionary of input files
             - optional requirements file
     """
-    analysis_id = gear_context.destination["id"]
-    analysis = gear_context.client.get_analysis(analysis_id)
+    container_id = gear_context.destination["id"]
+    container = gear_context.client.get_container(container_id)
 
-    get_parent_fn = getattr(gear_context.client, f"get_{analysis.parent.type}")
-    parent = get_parent_fn(analysis.parent.id)
+    # get_parent_fn = getattr(gear_context.client, f"get_{container.parent.type}")
+    # parent = get_parent_fn(analysis.parent.id)
+
+    parent_id = get_parent_id(container)
+    parent = gear_context.client.get(parent_id)
 
     input_file_one = gear_context.get_input_path("additional-input-one")
     input_files = {
         "additional_input_one": input_file_one
     }
     return parent, input_files
+
+
+def get_parent_id(container):
+    parents = container.parents
+    for pp in parents.attribute_map:
+        if parents[pp] is not None:
+            return parents[pp]

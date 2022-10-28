@@ -4,6 +4,7 @@ import logging
 import flywheel
 import pandas as pd
 import sys
+import os
 from io import StringIO
 from flywheel_gear_toolkit.utils.curator import HierarchyCurator
 from flywheel_gear_toolkit.utils import walker
@@ -127,11 +128,18 @@ if __name__ == "__main__":
 
     # Get access to gear config, inputs, and sdk client if enabled.
     with GearToolkitContext() as gtk_context:
-    # with GearToolkitContext(config_path='bids-pre-curate-0.1.5_inc1.1-62ed7835de9a4cd49f4f4e67/config.json'\
-    #                         , manifest_path='bids-pre-curate-0.1.5_inc1.1-62ed7835de9a4cd49f4f4e67/manifest.json') as gtk_context:
+    # runname = os.path.realpath(__file__)
+    # path = os.path.dirname(runname)
+    # with GearToolkitContext(config_path=os.path.join(path, 'thisjob/config.json'), manifest_path=os.path.join(path, 'thisjob/manifest.json'), gear_path=os.path.join(path,'thisjob/')) as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        config_dictionary['api-key']['key'] = 'XXX'
+        # apikey_file = os.path.join(os.environ["HOME"], '.config/flywheel/user.json')
+        apikey_file = "/flywheel/v0/user.json"
+        if os.path.exists(apikey_file):
+            f = open(apikey_file)
+            data = json.load(f)
+            key = {"base": "api-key", "key": data["key"]}
+            config_dictionary['api-key'] = key
 
         parent, input_files = parser.parse_config(gtk_context)
 
