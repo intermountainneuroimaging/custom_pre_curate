@@ -16,11 +16,14 @@ def parse_config(gear_context):
     container_id = gear_context.destination["id"]
     container = gear_context.client.get_container(container_id)
 
-    # get_parent_fn = getattr(gear_context.client, f"get_{container.parent.type}")
-    # parent = get_parent_fn(analysis.parent.id)
+    # if run as analysis gear...
+    if "gear_info" in container:
+        get_parent_fn = getattr(gear_context.client, f"get_{container.parent.type}")
+        parent = get_parent_fn(container.parent.id)
+    else:
+        # if utility gear, "destination id" from config is working container (e.g. acquisition, session)
+        parent = container
 
-    parent_id = get_parent_id(container)
-    parent = gear_context.client.get(parent_id)
 
     input_file_one = gear_context.get_input_path("additional-input-one")
     input_files = {

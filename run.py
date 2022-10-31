@@ -133,8 +133,8 @@ if __name__ == "__main__":
     # with GearToolkitContext(config_path=os.path.join(path, 'thisjob/config.json'), manifest_path=os.path.join(path, 'thisjob/manifest.json'), gear_path=os.path.join(path,'thisjob/')) as gtk_context:
         gtk_context.init_logging()
         config_dictionary = gtk_context.config_json['inputs']
-        # apikey_file = os.path.join(os.environ["HOME"], '.config/flywheel/user.json')
-        apikey_file = "/flywheel/v0/user.json"
+        apikey_file = os.path.join(os.environ["HOME"], '.config/flywheel/user.json')
+        # apikey_file = "/flywheel/v0/user.json"
         if os.path.exists(apikey_file):
             f = open(apikey_file)
             data = json.load(f)
